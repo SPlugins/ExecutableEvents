@@ -655,7 +655,9 @@ public class ActivatorEEFeature extends SActivator<ActivatorEEFeature, Activator
         if (Option.getOptionWithTargetEntitySt().contains(optionFeature.getValue()) && targetEntity != null) {
             ActionInfo aIClone = actionInfo.clone();
             aIClone.setEntityUUID(targetEntity.getUniqueId());
-            targetEntityCommands.runCommands(aIClone, executableEvent.getDisplayName().getValue().orElse(""));
+            // The fished item is not in the world yet when the event is called (same as ExecutableItems)
+            boolean needToDelayOneTickBecauseEntityIsNotInGame = optionFeature.getValue().equals(Option.PLAYER_FISH_FISH);
+            targetEntityCommands.runCommands(aIClone, executableEvent.getDisplayName().getValue().orElse(""), needToDelayOneTickBecauseEntityIsNotInGame);
         }
 
 
