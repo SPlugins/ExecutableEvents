@@ -49,6 +49,8 @@ public class ExecutableEventLoader extends SObjectWithFileLoader<ExecutableEvent
 
         // ITEMS CONFIG
         ExecutableEventsManager.getInstance().setLoadedObjects(new ArrayList<>());
+        /* also when no event is loaded anymore (setLoadedObjects does not notify the manager) */
+        ExecutableEventsManager.getInstance().onLoadedObjectsChanged();
 
         this.resetCpt();
         File itemsDirectory;

@@ -30,6 +30,12 @@ public class ExecutableEventsManager extends SObjectWithFileManager<ExecutableEv
         super(ExecutableEvents.plugin);
     }
 
+    /** The PLAYER_WRITE_COMMAND activators with registerCommand: true follow the loaded events */
+    @Override
+    public void onLoadedObjectsChanged() {
+        com.ssomar.executableevents.executableevents.activators.RegisteredCommandActivators.requestSync();
+    }
+
     public static ExecutableEventsManager getInstance() {
         ExecutableEventsManager i = instance;
         if (i == null) {
