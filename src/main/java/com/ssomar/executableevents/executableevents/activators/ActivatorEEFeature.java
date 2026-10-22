@@ -103,6 +103,8 @@ public class ActivatorEEFeature extends SActivator<ActivatorEEFeature, Activator
 
     private ListDamageCauseFeature detailedDamageCauses;
     private ListUncoloredStringFeature detailedCommands;
+    /* PLAYER_WRITE_COMMAND: register the commands of detailedCommands on the server (opt-in) */
+    private BooleanFeature registerCommand;
     private ListUncoloredStringFeature detailedMessagesContains;
     private ListUncoloredStringFeature detailedMessagesEquals;
     private ListInventoryTypeFeature detailedInventories;
@@ -749,6 +751,7 @@ public class ActivatorEEFeature extends SActivator<ActivatorEEFeature, Activator
 
         if (Option.getOptionWithCommand().contains(optionFeature.getValue())) {
             features.add(detailedCommands);
+            features.add(registerCommand);
         }
 
         if (Option.getOptionWithMessage().contains(optionFeature.getValue())) {
@@ -863,6 +866,7 @@ public class ActivatorEEFeature extends SActivator<ActivatorEEFeature, Activator
                     a.setDetailedTargetEntities(detailedTargetEntities);
                     a.setDetailedDamageCauses(detailedDamageCauses);
                     a.setDetailedCommands(detailedCommands);
+                    a.setRegisterCommand(registerCommand);
                     a.setDetailedMessagesContains(detailedMessagesContains);
                     a.setDetailedMessagesEquals(detailedMessagesEquals);
                     a.setDetailedItems(detailedItems);
@@ -925,6 +929,7 @@ public class ActivatorEEFeature extends SActivator<ActivatorEEFeature, Activator
 
         clone.setDetailedDamageCauses(detailedDamageCauses.clone(clone));
         clone.setDetailedCommands(detailedCommands.clone(clone));
+        clone.setRegisterCommand(registerCommand.clone(clone));
         clone.setDetailedMessagesContains(detailedMessagesContains.clone(clone));
         clone.setDetailedMessagesEquals(detailedMessagesEquals.clone(clone));
         clone.setDetailedItems(detailedItems.clone(clone));
@@ -1010,6 +1015,7 @@ public class ActivatorEEFeature extends SActivator<ActivatorEEFeature, Activator
 
             if (Option.getOptionWithCommand().contains(optionFeature.getValue())) {
                 errors.addAll(detailedCommands.load(sPlugin, section, premiumLoading));
+                errors.addAll(registerCommand.load(sPlugin, section, premiumLoading));
             }
 
             if (Option.getOptionWithMessage().contains(optionFeature.getValue())) {
@@ -1154,6 +1160,8 @@ public class ActivatorEEFeature extends SActivator<ActivatorEEFeature, Activator
         this.detailedDamageCauses = new ListDamageCauseFeature(this,  new ArrayList<>(), FeatureSettingsSCore.detailedDamageCauses);
 
         this.detailedCommands = new ListUncoloredStringFeature(this, new ArrayList<>(), FeatureSettingsSCore.detailedCommands, Optional.empty());
+
+        this.registerCommand = new BooleanFeature(this, false, FeatureSettingsSCore.registerCommand);
 
         this.detailedMessagesContains = new ListUncoloredStringFeature(this, new ArrayList<>(), FeatureSettingsSCore.detailedMessagesContains, Optional.empty());
         this.detailedMessagesEquals = new ListUncoloredStringFeature(this, new ArrayList<>(), FeatureSettingsSCore.detailedMessagesEquals, Optional.empty());

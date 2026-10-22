@@ -113,6 +113,8 @@ public class ExecutableEvent extends SObjectWithFileEditable<ExecutableEvent, Ex
 
     @Override
     public void reload() {
+        /* an activator may have been added, edited or deleted in the editor: registerCommand */
+        com.ssomar.executableevents.executableevents.activators.RegisteredCommandActivators.requestSync();
         if (getParent() instanceof ExecutableEvent) {
             ExecutableEvent item = (ExecutableEvent) getParent();
             item.setEnabled(enabled);
