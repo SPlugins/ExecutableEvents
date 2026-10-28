@@ -1,5 +1,6 @@
 package com.ssomar.executableevents.executableevents.activators;
 
+import com.ssomar.score.utils.backward_compatibility.SnapshotUtils;
 import com.ssomar.executableevents.ExecutableEvents;
 import com.ssomar.executableevents.commands.DebugMode;
 import com.ssomar.executableevents.configs.GeneralConfig;
@@ -456,7 +457,7 @@ public class ActivatorEEFeature extends SActivator<ActivatorEEFeature, Activator
                 return;
 
             /* Verification of must be its own inventory option for the activator that have it */
-            if (mustBeItsOwnInventory.getValue() && eInfo.getInventory().isPresent() && eInfo.getInventory().get().getHolder() != player)
+            if (mustBeItsOwnInventory.getValue() && eInfo.getInventory().isPresent() && SnapshotUtils.getHolderNoSnapshot(eInfo.getInventory().get()) != player)
                 return;
         }
 
