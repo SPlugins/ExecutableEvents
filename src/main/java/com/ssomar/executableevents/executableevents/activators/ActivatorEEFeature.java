@@ -1077,6 +1077,7 @@ public class ActivatorEEFeature extends SActivator<ActivatorEEFeature, Activator
                 errors.addAll(detailedEffects.load(sPlugin, section, premiumLoading));
             }
 
+            LoopEntityActivators.warnIfNoTypeFilter(this);
         }
         return errors;
     }
@@ -1227,11 +1228,14 @@ public class ActivatorEEFeature extends SActivator<ActivatorEEFeature, Activator
     public void activateOptionGlobal(EventInfo eventInfo) {
         List<SActivator> activators = new ArrayList<>();
         List<SActivator> activatorsLoopServer = new ArrayList<>();
+        List<SActivator> activatorsLoopEntity = new ArrayList<>();
         //SsomarDev.testMsg("activateOptionGlobal", true);
         for (SActivator activator : eventInfo.getWhitelistActivators()) {
             if (activator instanceof ActivatorEEFeature) {
                 if (activator.getOption() == Option.LOOP_SERVER)
                     activatorsLoopServer.add((ActivatorEEFeature) activator);
+                else if (activator.getOption() == Option.LOOP_ENTITY)
+                    activatorsLoopEntity.add((ActivatorEEFeature) activator);
                 else
                     activators.add((ActivatorEEFeature) activator);
             }
@@ -1249,6 +1253,10 @@ public class ActivatorEEFeature extends SActivator<ActivatorEEFeature, Activator
             eventInfo.setOption(Option.LOOP_SERVER);
             eventInfo.setWhitelistActivators(activatorsLoopServer);
             EventsManager.getInstance().activeOption(eventInfo);
+        }
+        /* One pass over the entities of each world for all the LOOP_ENTITY activators of this cycle */
+        if (!activatorsLoopEntity.isEmpty()) {
+            LoopEntityActivators.run(activatorsLoopEntity, eventInfo.getEventSource());
         }
         if (!activators.isEmpty()){
             eventInfo.setOption(OptionGlobal.LOOP);
