@@ -1,5 +1,6 @@
 package com.ssomar.executableevents.executableevents.activators;
 
+import com.ssomar.score.utils.backward_compatibility.SnapshotUtils;
 import com.ssomar.executableevents.ExecutableEvents;
 import com.ssomar.executableevents.commands.DebugMode;
 import com.ssomar.executableevents.configs.GeneralConfig;
@@ -103,6 +104,8 @@ public class ActivatorEEFeature extends SActivator<ActivatorEEFeature, Activator
 
     private ListDamageCauseFeature detailedDamageCauses;
     private ListUncoloredStringFeature detailedCommands;
+    /* PLAYER_WRITE_COMMAND: register the commands of detailedCommands on the server (opt-in) */
+    private BooleanFeature registerCommand;
     private ListUncoloredStringFeature detailedMessagesContains;
     private ListUncoloredStringFeature detailedMessagesEquals;
     private ListInventoryTypeFeature detailedInventories;
@@ -454,7 +457,7 @@ public class ActivatorEEFeature extends SActivator<ActivatorEEFeature, Activator
                 return;
 
             /* Verification of must be its own inventory option for the activator that have it */
-            if (mustBeItsOwnInventory.getValue() && eInfo.getInventory().isPresent() && eInfo.getInventory().get().getHolder() != player)
+            if (mustBeItsOwnInventory.getValue() && eInfo.getInventory().isPresent() && SnapshotUtils.getHolderNoSnapshot(eInfo.getInventory().get()) != player)
                 return;
         }
 
@@ -749,6 +752,7 @@ public class ActivatorEEFeature extends SActivator<ActivatorEEFeature, Activator
 
         if (Option.getOptionWithCommand().contains(optionFeature.getValue())) {
             features.add(detailedCommands);
+            features.add(registerCommand);
         }
 
         if (Option.getOptionWithMessage().contains(optionFeature.getValue())) {
@@ -863,6 +867,7 @@ public class ActivatorEEFeature extends SActivator<ActivatorEEFeature, Activator
                     a.setDetailedTargetEntities(detailedTargetEntities);
                     a.setDetailedDamageCauses(detailedDamageCauses);
                     a.setDetailedCommands(detailedCommands);
+                    a.setRegisterCommand(registerCommand);
                     a.setDetailedMessagesContains(detailedMessagesContains);
                     a.setDetailedMessagesEquals(detailedMessagesEquals);
                     a.setDetailedItems(detailedItems);
@@ -925,6 +930,7 @@ public class ActivatorEEFeature extends SActivator<ActivatorEEFeature, Activator
 
         clone.setDetailedDamageCauses(detailedDamageCauses.clone(clone));
         clone.setDetailedCommands(detailedCommands.clone(clone));
+        clone.setRegisterCommand(registerCommand.clone(clone));
         clone.setDetailedMessagesContains(detailedMessagesContains.clone(clone));
         clone.setDetailedMessagesEquals(detailedMessagesEquals.clone(clone));
         clone.setDetailedItems(detailedItems.clone(clone));
@@ -1010,6 +1016,7 @@ public class ActivatorEEFeature extends SActivator<ActivatorEEFeature, Activator
 
             if (Option.getOptionWithCommand().contains(optionFeature.getValue())) {
                 errors.addAll(detailedCommands.load(sPlugin, section, premiumLoading));
+                errors.addAll(registerCommand.load(sPlugin, section, premiumLoading));
             }
 
             if (Option.getOptionWithMessage().contains(optionFeature.getValue())) {
@@ -1070,6 +1077,7 @@ public class ActivatorEEFeature extends SActivator<ActivatorEEFeature, Activator
                 errors.addAll(detailedEffects.load(sPlugin, section, premiumLoading));
             }
 
+            LoopEntityActivators.warnIfNoTypeFilter(this);
         }
         return errors;
     }
@@ -1155,6 +1163,8 @@ public class ActivatorEEFeature extends SActivator<ActivatorEEFeature, Activator
 
         this.detailedCommands = new ListUncoloredStringFeature(this, new ArrayList<>(), FeatureSettingsSCore.detailedCommands, Optional.empty());
 
+        this.registerCommand = new BooleanFeature(this, false, FeatureSettingsSCore.registerCommand);
+
         this.detailedMessagesContains = new ListUncoloredStringFeature(this, new ArrayList<>(), FeatureSettingsSCore.detailedMessagesContains, Optional.empty());
         this.detailedMessagesEquals = new ListUncoloredStringFeature(this, new ArrayList<>(), FeatureSettingsSCore.detailedMessagesEquals, Optional.empty());
 
@@ -1218,11 +1228,14 @@ public class ActivatorEEFeature extends SActivator<ActivatorEEFeature, Activator
     public void activateOptionGlobal(EventInfo eventInfo) {
         List<SActivator> activators = new ArrayList<>();
         List<SActivator> activatorsLoopServer = new ArrayList<>();
+        List<SActivator> activatorsLoopEntity = new ArrayList<>();
         //SsomarDev.testMsg("activateOptionGlobal", true);
         for (SActivator activator : eventInfo.getWhitelistActivators()) {
             if (activator instanceof ActivatorEEFeature) {
                 if (activator.getOption() == Option.LOOP_SERVER)
                     activatorsLoopServer.add((ActivatorEEFeature) activator);
+                else if (activator.getOption() == Option.LOOP_ENTITY)
+                    activatorsLoopEntity.add((ActivatorEEFeature) activator);
                 else
                     activators.add((ActivatorEEFeature) activator);
             }
@@ -1240,6 +1253,10 @@ public class ActivatorEEFeature extends SActivator<ActivatorEEFeature, Activator
             eventInfo.setOption(Option.LOOP_SERVER);
             eventInfo.setWhitelistActivators(activatorsLoopServer);
             EventsManager.getInstance().activeOption(eventInfo);
+        }
+        /* One pass over the entities of each world for all the LOOP_ENTITY activators of this cycle */
+        if (!activatorsLoopEntity.isEmpty()) {
+            LoopEntityActivators.run(activatorsLoopEntity, eventInfo.getEventSource());
         }
         if (!activators.isEmpty()){
             eventInfo.setOption(OptionGlobal.LOOP);

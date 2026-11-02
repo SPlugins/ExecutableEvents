@@ -39,6 +39,7 @@ public class ActivatorEEFeatureEditor extends FeatureEditorInterface<ActivatorEE
             activator.getDetailedDamageCauses().initAndUpdateItemParentEditor(this, 14);
         } else if (Option.getOptionWithCommand().contains(activator.getOption())) {
             activator.getDetailedCommands().initAndUpdateItemParentEditor(this, 14);
+            activator.getRegisterCommand().initAndUpdateItemParentEditor(this, 12);
         }
         else if (Option.getOptionWithMessage().contains(activator.getOption())) {
             activator.getDetailedMessagesContains().initAndUpdateItemParentEditor(this, 14);

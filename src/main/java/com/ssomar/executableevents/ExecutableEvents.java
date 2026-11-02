@@ -181,6 +181,11 @@ public class ExecutableEvents extends JavaPlugin {
     @Override
     public void onDisable() {
         try {
+            /* the commands registered for the activators (registerCommand) */
+            com.ssomar.executableevents.executableevents.activators.RegisteredCommandActivators.unregisterAll();
+        } catch (Throwable ignored) {
+        }
+        try {
             if (SCore.plugin.isEnabled()) SCore.plugin.getServer().getPluginManager().disablePlugin(SCore.plugin);
         } catch (Error ignored) {
             //Probably already disabled
