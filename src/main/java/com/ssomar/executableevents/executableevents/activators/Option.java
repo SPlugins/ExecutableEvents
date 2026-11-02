@@ -220,7 +220,8 @@ public enum Option implements SOption, Serializable {
     public static List<SOption> getPremiumOptionSt() {
         List<SOption> result = new ArrayList<>();
         for (Option option : values()) {
-            if (getOptionWithPlayerSt().contains(option) || option.isLoopOption()) continue;
+            /* LOOP_ENTITY is a loop option but premium (choice of Ssomar, 2026-11-02) */
+            if (option != Option.LOOP_ENTITY && (getOptionWithPlayerSt().contains(option) || option.isLoopOption())) continue;
             else result.add(option);
         }
         return result;
