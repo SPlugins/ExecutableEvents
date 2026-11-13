@@ -79,7 +79,8 @@ public class CommandsClass extends CommandsClassAbstract<SExecutableEvents> {
                             getSm().sendMessage(sender, getSPlugin().getNameDesign() + " &7The folder &e" + folderName + " &7has been reloaded !");
                         else
                             getSm().sendMessage(sender, "&c"+getSPlugin().getNameWithBrackets()+" &cThe folder &6" + folderName + " &cdoes not exist !");
-
+                        /* without it the folder reload went on into enable/disable and disabled every event of the folder */
+                        break;
                     } else {
                         if (ExecutableEventsManager.getInstance().isValidID(idToReload)) {
                             ExecutableEventsManager.getInstance().reloadObject(idToReload);
